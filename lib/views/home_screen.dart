@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models/mural.dart';
 
@@ -27,6 +28,7 @@ class HomeScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final mural = murals[index];
               return ListTile(
+                  onTap: () => context.go('/mural', extra: mural),
                 title: Text(mural.name),
                 subtitle: Text('${mural.artist} • ${mural.address}'),
               );
