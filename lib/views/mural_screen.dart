@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../models/mural.dart';
 
 class MuralScreen extends StatefulWidget {
-  final dynamic mural;
-
-  const MuralScreen({super.key, required this.mural});
+  final Mural mural;
+  final Position? userPosition;
+  const MuralScreen({super.key, required this.mural, this.userPosition});
 
 State<MuralScreen> createState() => _MuralScreenState();
 
 }
+
 class _MuralScreenState extends State<MuralScreen> {
   late final MapController _miniMapController;
 
@@ -44,12 +46,37 @@ class _MuralScreenState extends State<MuralScreen> {
         ),
       ),
     );
+    final userPosition = widget.userPosition;
+    if (userPosition != null) {
+      await _miniMapController.addMarker(
+        GeoPoint(
+          latitude: userPosition.latitude,
+          longitude: userPosition.longitude,
+        ),
+        markerIcon: const MarkerIcon(
+          iconWidget: SizedBox.square(
+            dimension: 48,
+            child: Icon(Icons.my_location, color: Colors.blue, size: 48),
+          ),
+        ),
+      );
+    }
   }
   late final dynamic mural;
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.sizeOf(context).width > 800;
+    double? distance;
 
+    var userPosition = widget.userPosition;
+    if (userPosition != null) {
+      distance = Geolocator.distanceBetween(
+        userPosition.latitude,
+        userPosition.longitude,
+        widget.mural.latitude,
+        widget.mural.longitude,
+      );
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('Détails de la fresque')),
       body: Padding(
@@ -79,6 +106,12 @@ class _MuralScreenState extends State<MuralScreen> {
         ),
       ),
     ),
+            const SizedBox(height: 8),
+            Text(
+              "Distance : ${distance != null ? '${distance.toStringAsFixed(2)} m' : '--- m'}",
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: Colors.white70),
+            ),
           ],
         ),
       ),

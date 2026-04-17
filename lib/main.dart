@@ -1,11 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 
 import 'models/mural.dart';
 import 'views/home_screen.dart';
 import 'views/mural_screen.dart';
 
-void main() => runApp(const MuralMapApp());
+Position? _userPosition;
+
+Future<void> _locateUser() async {
+  var permission = await Geolocator.checkPermission();
+
+  // permission is not granted, request it
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+  }
+
+  // permission is still not granted, or denied forever, we can't get location
+  if (permission == LocationPermission.denied ||
+      permission == LocationPermission.deniedForever) {
+    return;
+  }
+
+  _userPosition = await Geolocator.getCurrentPosition();
+}
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  _locateUser();
+  runApp(const MuralMapApp());
+}
 
 final _router = GoRouter(
   routes: [
@@ -23,8 +47,7 @@ final _router = GoRouter(
                 body: const Center(child: Text('Aucune fresque sélectionnée.')),
               );
             }
-            return MuralScreen(mural: mural);
-          },
+            return MuralScreen(mural: mural, userPosition: _userPosition);          },
         ),
       ],
     ),
@@ -33,6 +56,7 @@ final _router = GoRouter(
 
 class MuralMapApp extends StatelessWidget {
   const MuralMapApp({super.key});
+
 
   @override
   Widget build(BuildContext context) {
