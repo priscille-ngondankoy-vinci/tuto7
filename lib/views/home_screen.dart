@@ -40,17 +40,13 @@ class _HomeScreenState extends State<HomeScreen> {
         future: fetchMurals(),
         builder: (context, snapshot) {
           final murals = snapshot.data!;
-          if (_currentView == MainView.list) {
-            return MuralList(murals: murals);
-          }
-
-          if (_currentView == MainView.map) {
-            return MuralMap(murals: murals);
-
-        }
-          if (_currentView == MainView.list) {
-            return MuralList(murals: murals);
-          }
+          return IndexedStack(
+            index: _currentView == MainView.map ? 1 : 0,
+            children: [
+              MuralList(murals: murals),
+              MuralMap(murals: murals),
+            ],
+          );
 
 
 
